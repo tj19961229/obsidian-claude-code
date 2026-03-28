@@ -35,7 +35,6 @@ import {
   getSelection,
   openNote,
   readNote,
-  ToolResult,
 } from "../tools/editor-tools";
 
 const SELECTION_DEBOUNCE_MS = 300;
@@ -65,10 +64,6 @@ export class McpBridge {
   private clients: ConnectedClient[] = [];
   private selectionDebounceTimer: ReturnType<typeof setTimeout> | null = null;
   private _cachedSelection: CachedSelection | null = null;
-
-  get cachedSelection(): CachedSelection | null {
-    return this._cachedSelection;
-  }
 
   constructor(app: App, version: string) {
     this.app = app;
@@ -117,9 +112,6 @@ export class McpBridge {
     }
   }
 
-  /**
-   * Send an @mention notification to all connected clients.
-   */
   sendAtMentioned(filePath: string, lineStart: number, lineEnd: number): void {
     const notification = buildAtMentionedNotification(
       filePath,
@@ -129,9 +121,6 @@ export class McpBridge {
     this.broadcast(notification);
   }
 
-  /**
-   * Send a selection-changed notification with debounce.
-   */
   sendSelectionChanged(
     filePath: string,
     text: string,
@@ -166,10 +155,6 @@ export class McpBridge {
     }, SELECTION_DEBOUNCE_MS);
   }
 
-  clearCachedSelection(): void {
-    this._cachedSelection = null;
-  }
-
   sendSelectionCleared(): void {
     this._cachedSelection = null;
     if (this.selectionDebounceTimer) {
@@ -200,14 +185,8 @@ export class McpBridge {
     };
 
     server.connect(transport).then(() => {
-      server.notification({
-        method: "ide_connected",
-        params: { pid: process.pid },
-      }).catch((err: Error) => {
-        console.error(
-          "Claude Code Bridge: failed to send connected notification",
-          err
-        );
+      server.notification(buildIdeConnectedNotification(process.pid)).catch((err: Error) => {
+        console.error("Claude Code Bridge: failed to send connected notification", err);
       });
     });
   }
@@ -308,10 +287,6 @@ export class McpBridge {
     );
 
     return server;
-  }
-
-  getClientCount(): number {
-    return this.clients.length;
   }
 
   private broadcast(notification: { method: string; params?: Record<string, unknown> }): void {

@@ -11,12 +11,26 @@ import { App, MarkdownView, TFile } from "obsidian";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { CachedSelection } from "../mcp/server";
 
-export type ToolResult = CallToolResult;
+type ToolResult = CallToolResult;
 
 function textResult(data: unknown): ToolResult {
   return {
-    content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+    content: [{ type: "text", text: JSON.stringify(data) }],
   };
+}
+
+function cachedSelectionResult(cached: CachedSelection): ToolResult {
+  return textResult({
+    filePath: cached.filePath,
+    text: cached.text,
+    range: {
+      startLine: cached.startLine,
+      startColumn: cached.startColumn,
+      endLine: cached.endLine,
+      endColumn: cached.endColumn,
+    },
+    cached: true,
+  });
 }
 
 function errorResult(message: string): ToolResult {
@@ -74,38 +88,14 @@ export function getSelection(
 ): ToolResult {
   const view = app.workspace.getActiveViewOfType(MarkdownView);
   if (!view || !view.file) {
-    if (cached) {
-      return textResult({
-        filePath: cached.filePath,
-        text: cached.text,
-        range: {
-          startLine: cached.startLine,
-          startColumn: cached.startColumn,
-          endLine: cached.endLine,
-          endColumn: cached.endColumn,
-        },
-        cached: true,
-      });
-    }
+    if (cached) return cachedSelectionResult(cached);
     return errorResult("No active markdown note");
   }
 
   const editor = view.editor;
   const selection = editor.getSelection();
   if (!selection) {
-    if (cached) {
-      return textResult({
-        filePath: cached.filePath,
-        text: cached.text,
-        range: {
-          startLine: cached.startLine,
-          startColumn: cached.startColumn,
-          endLine: cached.endLine,
-          endColumn: cached.endColumn,
-        },
-        cached: true,
-      });
-    }
+    if (cached) return cachedSelectionResult(cached);
     return errorResult("No text selected");
   }
 

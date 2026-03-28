@@ -7,7 +7,7 @@
  *
  * @author tj
  */
-import { writeFileSync, unlinkSync, mkdirSync, existsSync } from "fs";
+import { writeFileSync, unlinkSync, mkdirSync } from "fs";
 import { join } from "path";
 import { homedir } from "os";
 import * as net from "net";
@@ -57,9 +57,7 @@ export function createLockFile(
   vaultBasePath: string
 ): void {
   const lockDir = getLockDir();
-  if (!existsSync(lockDir)) {
-    mkdirSync(lockDir, { recursive: true });
-  }
+  mkdirSync(lockDir, { recursive: true });
 
   const data: LockFileData = {
     workspaceFolders: [vaultBasePath],

@@ -92,7 +92,7 @@ export default class ClaudeCodeBridgePlugin extends Plugin {
       }
     }, SELECTION_POLL_MS);
 
-    console.log("Claude Code Bridge: loaded [build-20260328-1520] ide-filter+content-lines");
+    console.log("Claude Code Bridge: loaded");
   }
 
   async onunload(): Promise<void> {
