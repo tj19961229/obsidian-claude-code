@@ -69,7 +69,7 @@ export function createLockFile(
   };
 
   const filePath = join(lockDir, `${port}.lock`);
-  writeFileSync(filePath, JSON.stringify(data), "utf-8");
+  writeFileSync(filePath, JSON.stringify(data), { encoding: "utf-8", mode: 0o600 });
 }
 
 /**

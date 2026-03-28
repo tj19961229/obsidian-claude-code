@@ -121,6 +121,9 @@ export async function openNote(
   app: App,
   filePath: string
 ): Promise<ToolResult> {
+  if (!filePath || typeof filePath !== "string") {
+    return errorResult("filePath is required");
+  }
   const file = app.vault.getAbstractFileByPath(filePath);
   if (!file || !(file instanceof TFile)) {
     return errorResult(`File not found: ${filePath}`);
@@ -137,6 +140,9 @@ export async function readNote(
   app: App,
   filePath: string
 ): Promise<ToolResult> {
+  if (!filePath || typeof filePath !== "string") {
+    return errorResult("filePath is required");
+  }
   const file = app.vault.getAbstractFileByPath(filePath);
   if (!file || !(file instanceof TFile)) {
     return errorResult(`File not found: ${filePath}`);

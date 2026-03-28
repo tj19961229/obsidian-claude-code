@@ -74,7 +74,11 @@ export class McpBridge {
   async start(): Promise<void> {
     this.port = await findAvailablePort();
 
-    this.wss = new WebSocketServer({ port: this.port, host: "127.0.0.1" });
+    this.wss = new WebSocketServer({
+      port: this.port,
+      host: "127.0.0.1",
+      maxPayload: 1024 * 1024,
+    });
 
     this.wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
       this.handleConnection(ws, req);
@@ -167,13 +171,13 @@ export class McpBridge {
 
   private handleConnection(ws: WebSocket, req: IncomingMessage): void {
     const token = req.headers["x-claude-code-ide-authorization"] as string | undefined;
-    if (token && token !== this.authToken) {
-      console.log("Claude Code Bridge: rejected connection (invalid auth token)");
+    if (!token || token !== this.authToken) {
+      console.log("Claude Code Bridge: rejected connection (missing or invalid auth token)");
       ws.close(4001, "Invalid auth token");
       return;
     }
 
-    const isIdeClient = !!token;
+    const isIdeClient = true;
     const transport = new WebSocketTransport(ws);
     const server = this.createMcpServer();
     const client: ConnectedClient = { server, transport, isIdeClient };
