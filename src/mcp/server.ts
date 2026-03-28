@@ -24,6 +24,7 @@ import {
   deleteLockFile,
 } from "./lock-file";
 import {
+  buildActiveFileNotification,
   buildAtMentionedNotification,
   buildIdeConnectedNotification,
   buildSelectionChangedNotification,
@@ -148,7 +149,7 @@ export class McpBridge {
     this.selectionDebounceTimer = setTimeout(() => {
       this.selectionDebounceTimer = null;
       const notification = buildSelectionChangedNotification(
-        filePath,
+        this.toAbsolutePath(filePath),
         text,
         startLine,
         startCharacter,
@@ -168,6 +169,29 @@ export class McpBridge {
     const notification = buildSelectionClearedNotification();
     this.broadcast(notification);
   }
+
+  sendActiveFileChanged(filePath: string, cursorLine = 0, cursorCharacter = 0): void {
+    this._cachedSelection = null;
+    if (this.selectionDebounceTimer) {
+      clearTimeout(this.selectionDebounceTimer);
+      this.selectionDebounceTimer = null;
+    }
+    const notification = buildActiveFileNotification(
+      this.toAbsolutePath(filePath),
+      cursorLine,
+      cursorCharacter
+    );
+    this.broadcast(notification);
+  }
+
+  private getVaultBasePath(): string {
+    return (this.app.vault.adapter as FileSystemAdapter).getBasePath();
+  }
+
+  private toAbsolutePath(vaultRelativePath: string): string {
+    return `${this.getVaultBasePath()}/${vaultRelativePath}`;
+  }
+
 
   private handleConnection(ws: WebSocket, req: IncomingMessage): void {
     const token = req.headers["x-claude-code-ide-authorization"] as string | undefined;

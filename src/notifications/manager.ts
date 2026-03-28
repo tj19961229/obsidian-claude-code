@@ -30,6 +30,25 @@ export function buildSelectionChangedNotification(
   };
 }
 
+export function buildActiveFileNotification(
+  filePath: string,
+  cursorLine: number,
+  cursorCharacter: number
+): JSONRPCNotification {
+  return {
+    jsonrpc: "2.0",
+    method: "selection_changed",
+    params: {
+      filePath,
+      text: "",
+      selection: {
+        start: { line: cursorLine, character: cursorCharacter },
+        end: { line: cursorLine, character: cursorCharacter },
+      },
+    },
+  };
+}
+
 export function buildSelectionClearedNotification(): JSONRPCNotification {
   return {
     jsonrpc: "2.0",

@@ -36,7 +36,18 @@ npm install
 npm run build
 ```
 
-Copy `main.js` and `manifest.json` to your vault's plugin folder.
+Then install into your Obsidian vault:
+
+```bash
+# Replace <VAULT> with your vault path
+PLUGIN_DIR="<VAULT>/.obsidian/plugins/obsidian-claude-code"
+mkdir -p "$PLUGIN_DIR"
+cp main.js manifest.json "$PLUGIN_DIR/"
+```
+
+Reload Obsidian (Ctrl/Cmd+P > "Reload app without saving") and enable the plugin in Settings > Community plugins.
+
+> **Tip**: During development you can use `npm run dev` for watch mode, then re-copy `main.js` after each change. The build output is always in the project root.
 
 ## How It Works
 

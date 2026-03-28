@@ -15,6 +15,7 @@ export default class ClaudeCodeBridgePlugin extends Plugin {
   private bridge: McpBridge | null = null;
   private selectionTimer: ReturnType<typeof setInterval> | null = null;
   private lastSelection = "";
+  private lastActiveFile = "";
 
   async onload(): Promise<void> {
     this.bridge = new McpBridge(this.app, this.manifest.version);
@@ -37,10 +38,40 @@ export default class ClaudeCodeBridgePlugin extends Plugin {
       },
     });
 
+    this.registerEvent(
+      this.app.workspace.on("active-leaf-change", () => {
+        if (!this.bridge) return;
+        const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+        const filePath = view?.file?.path ?? "";
+        if (filePath !== this.lastActiveFile) {
+          this.lastActiveFile = filePath;
+          this.lastSelection = "";
+          if (filePath) {
+            const cursor = view!.editor.getCursor();
+            this.bridge.sendActiveFileChanged(filePath, cursor.line, cursor.ch);
+          } else {
+            this.bridge.sendSelectionCleared();
+          }
+        }
+      })
+    );
+
     this.selectionTimer = setInterval(() => {
       if (!this.bridge) return;
       const view = this.app.workspace.getActiveViewOfType(MarkdownView);
-      if (!view?.file) return;
+      const activeFile = view?.file;
+      if (!activeFile) {
+        if (this.lastActiveFile) {
+          this.lastActiveFile = "";
+          this.lastSelection = "";
+          this.bridge.sendSelectionCleared();
+        }
+        return;
+      }
+
+      if (activeFile.path !== this.lastActiveFile) {
+        this.lastActiveFile = activeFile.path;
+      }
 
       const editor = view.editor;
       const isPreview = view.getMode() === "preview";
@@ -79,7 +110,7 @@ export default class ClaudeCodeBridgePlugin extends Plugin {
       if (selection && selection !== this.lastSelection) {
         this.lastSelection = selection;
         this.bridge.sendSelectionChanged(
-          view.file.path,
+          activeFile.path,
           selection,
           fromLine,
           fromCh,
@@ -88,7 +119,8 @@ export default class ClaudeCodeBridgePlugin extends Plugin {
         );
       } else if (!selection && this.lastSelection) {
         this.lastSelection = "";
-        this.bridge.sendSelectionCleared();
+        const cursor = editor.getCursor();
+        this.bridge.sendActiveFileChanged(activeFile.path, cursor.line, cursor.ch);
       }
     }, SELECTION_POLL_MS);
 
