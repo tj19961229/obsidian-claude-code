@@ -1,0 +1,25 @@
+{
+  "name": "obsidian-claude-code",
+  "version": "0.1.0",
+  "description": "Bridge between Obsidian and Claude Code via MCP protocol",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production"
+  },
+  "author": "tj",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/ws": "^8.5.0",
+    "builtin-modules": "3.3.0",
+    "esbuild": "0.21.0",
+    "obsidian": "latest",
+    "tslib": "^2.8.1",
+    "typescript": "^5.4.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "ws": "^8.16.0"
+  }
+}

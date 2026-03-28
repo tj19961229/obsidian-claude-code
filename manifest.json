@@ -1,0 +1,9 @@
+{
+	"id": "obsidian-claude-code",
+	"name": "Claude Code Bridge",
+	"version": "0.1.0",
+	"minAppVersion": "1.0.0",
+	"description": "Bridge between Obsidian and Claude Code — share selections, search vault, read/write notes via MCP protocol.",
+	"author": "tj",
+	"isDesktopOnly": true
+}
